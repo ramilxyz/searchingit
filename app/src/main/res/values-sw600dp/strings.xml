@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="err403">" Authenticated requests get a higher rate limit."</string>
+    <string name="to_continue_working_you_need_to_log_in">To continue working, you need to log in</string>
+</resources>
