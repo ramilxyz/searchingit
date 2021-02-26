@@ -10,10 +10,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewAnimationUtils
-import android.widget.AutoCompleteTextView
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
@@ -97,6 +94,11 @@ class MainActivity : AppCompatActivity() {
                         .into(navView.getHeaderView(0).findViewById<ImageView>(R.id.ivIcon))
 
             }
+        })
+
+        mainActivityViewModel.navigateToDetails.observe(this, {
+            val toast: Toast = Toast.makeText(this, getString(R.string.err403), Toast.LENGTH_LONG)
+            toast.show()
         })
 
         setupActionBarWithNavController(navController, appBarConfiguration)

@@ -1,7 +1,6 @@
 package xyz.ramil.searchingit.ui.main
 
 import android.content.Context
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,13 +10,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import xyz.ramil.searchingit.R
 import xyz.ramil.searchingit.data.db.DataManager
 import xyz.ramil.searchingit.data.model.User
 import xyz.ramil.searchingit.data.net.ApiManager
+import xyz.ramil.searchingit.utils.SingleLiveEvent
 
 
-class MainActivityViewModel(val context: Context) : ViewModel() {
+class MainActivityViewModel(val googleSignInAccount: GoogleSignInAccount) : ViewModel() {
 
     val apiManager = ApiManager()
 
@@ -25,17 +24,23 @@ class MainActivityViewModel(val context: Context) : ViewModel() {
 
     private val perPage : Int = 30
 
-    private var isLoad = false
+    private var  isLoad = false
 
     private val compositeDisposable = CompositeDisposable()
 
     private var data: MutableList<User> = mutableListOf()
 
     private val _account  = MutableLiveData<GoogleSignInAccount>().apply {
-        value = GoogleSignIn.getLastSignedInAccount(context)
+        value = googleSignInAccount
     }
 
     val account : LiveData<GoogleSignInAccount> = _account
+
+
+    private val showErrorToast = SingleLiveEvent<Any>()
+
+    val navigateToDetails : SingleLiveEvent<Any>
+        get() = showErrorToast
 
     fun search(query: String) {
         if(!isLoad) {
@@ -58,8 +63,7 @@ class MainActivityViewModel(val context: Context) : ViewModel() {
                                     { error ->
                                         isLoad = false
                                         if(error.localizedMessage.contains("403")) {
-                                            val toast: Toast = Toast.makeText(context, context.getString(R.string.err403), Toast.LENGTH_LONG)
-                                            toast.show()
+                                            this.showErrorToast.call()
                                         }
                                     }
                             ))
@@ -72,7 +76,7 @@ class MainActivityViewModel(val context: Context) : ViewModel() {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(MainActivityViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return MainActivityViewModel(context) as T
+                return GoogleSignIn.getLastSignedInAccount(context)?.let { MainActivityViewModel(it) } as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }
