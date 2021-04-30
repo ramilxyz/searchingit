@@ -14,36 +14,31 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 class ApiManager {
+     var apiService: ApiService
 
     init {
-        updateHost(API)
-    }
-
-    lateinit var apiService: ApiService
-
-    fun updateHost(host: String) {
         val httpClient: OkHttpClient.Builder = OkHttpClient.Builder()
-                .readTimeout(20, TimeUnit.SECONDS)
-                .connectTimeout(20, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
+            .connectTimeout(20, TimeUnit.SECONDS)
         httpClient.addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
         httpClient.addInterceptor(object : Interceptor {
             @Throws(IOException::class)
             override fun intercept(chain: Interceptor.Chain): Response {
                 val original: Request = chain.request()
                 val request = original.newBuilder()
-                        .header("Accept", "application/json")
-                        .method(original.method, original.body)
-                        .build()
+                    .header("Accept", "application/json")
+                    .method(original.method, original.body)
+                    .build()
                 return chain.proceed(request)
             }
         })
         val client: OkHttpClient = httpClient.build()
         val mRetrofit = Retrofit.Builder()
-                .baseUrl(host)
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .client(client)
-                .build()
+            .baseUrl(API)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .client(client)
+            .build()
         apiService = mRetrofit.create(ApiService::class.java)
     }
 
